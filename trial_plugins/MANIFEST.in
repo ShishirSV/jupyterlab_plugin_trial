@@ -1,0 +1,33 @@
+include LICENSE
+include *.md
+include pyproject.toml
+include setup.py
+include setup.cfg
+
+include package.json
+include yarn.lock
+include webpack.config.js
+include tsconfig.eslint.json
+include .prettierrc
+include .prettierignore
+include .eslintrc.js
+include .eslintignore
+include tsconfig.json
+include install.json
+include ts*.json
+
+graft trial_plugins/static
+graft trial_plugins/templates
+
+# Javascript files
+graft src
+graft style
+prune **/node_modules
+prune lib
+
+# Patterns to exclude from any directory
+global-exclude *~
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude .git
+global-exclude .ipynb_checkpoints
