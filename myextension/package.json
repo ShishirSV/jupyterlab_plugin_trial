@@ -1,0 +1,54 @@
+{
+  "name": "myextension",
+  "version": "0.1.0",
+  "description": "A JupyterLab extension.",
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlab-extension"
+  ],
+  "homepage": "https://github.com/github_username/myextension",
+  "bugs": {
+    "url": "https://github.com/github_username/myextension/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": {
+    "name": "trial_plugin_js",
+    "email": "me@me.com"
+  },
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/**/*.{css,js,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+  ],
+  "main": "lib/index.js",
+  "style": "style/index.css",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/github_username/myextension.git"
+  },
+  "scripts": {
+    "build": "npm run build:labextension:dev",
+    "build:prod": "npm run build:labextension",
+    "build:labextension": "jupyter labextension build .",
+    "build:labextension:dev": "jupyter labextension build --development True .",
+    "clean:labextension": "rimraf myextension/labextension",
+    "clean:all": "npm run clean:labextension",
+    "prepare": "npm run build:prod",
+    "watch": "npm run watch:labextension",
+    "watch:labextension": "jupyter labextension watch ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@jupyterlab/builder": "^3.0.0",
+    "rimraf": "^3.0.2"
+  },
+  "sideEffects": [
+    "style/*.css",
+    "style/index.js"
+  ],
+  "styleModule": "style/index.js",
+  "jupyterlab": {
+    "extension": true,
+    "outputDir": "myextension/labextension"
+  }
+}
