@@ -37,7 +37,9 @@
     "watch": "npm run watch:labextension",
     "watch:labextension": "jupyter labextension watch ."
   },
-  "dependencies": {},
+  "dependencies": {
+    "file-saver": "^2.0.5"
+  },
   "devDependencies": {
     "@jupyterlab/builder": "^4.1.6",
     "rimraf": "^3.0.2"
