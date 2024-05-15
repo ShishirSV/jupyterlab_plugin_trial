@@ -38,7 +38,8 @@
     "watch:labextension": "jupyter labextension watch ."
   },
   "dependencies": {
-    "file-saver": "^2.0.5"
+    "file-saver": "^2.0.5",
+    "util": "^0.12.3"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.1.6",

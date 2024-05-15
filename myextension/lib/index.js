@@ -1,3 +1,6 @@
+const story_comments = require('./config').story_comments;
+const story_details = require('./config').story_details;
+const story_pattern = require('./config').story_pattern;
 const { ToolbarButton } = require("@jupyterlab/apputils");
 const { DocumentRegistry } = require("@jupyterlab/docregistry");
 const { NotebookPanel, Notebook } = require("@jupyterlab/notebook");
@@ -10,10 +13,13 @@ const {
 const { editorServices } = require('@jupyterlab/codemirror');
 const app = JupyterFrontEnd.instance;
 const saveAs = require('file-saver');
+const { checkCellIsStory, checkPreApproval } = require('./helper');
+
 
 class ButtonExtension {
   constructor(app) {
     this.app = app;
+    this.username = process.env.JUPYTERHUB_USER; // Retrieve the username from JupyterHub's environment variables
   }
 
   createNew(panel, context) {
@@ -29,7 +35,19 @@ class ButtonExtension {
     });
     panel.toolbar.insertItem(11, 'to_csv', to_csv);
 
-    return [story_creation, to_csv];
+    let add_details = new ToolbarButton({
+      label: 'Add Details',
+      onClick: () => this.addStoryDetails(panel, context)
+    });
+    panel.toolbar.insertItem(12, 'add_details', add_details);
+
+    let approve_story = new ToolbarButton({
+      label: 'Approve',
+      onClick: () => this.approveStory(panel, context)
+    });
+    panel.toolbar.insertItem(13, 'approve_story', approve_story);
+
+    return [story_creation, to_csv, add_details, approve_story];
   }
 
   async saveToCSV(context) {
@@ -37,6 +55,8 @@ class ButtonExtension {
     const notebookWidget = this.app.shell.currentWidget;
     const activeCell = notebookWidget.content.activeCell;
     console.log(activeCell);
+
+    // Save the cell content to a CSV file
     const cellContent = activeCell.model.sharedModel.getSource();
     console.log(cellContent);
     const blob = new Blob([cellContent], {type: 'text/csv;charset=utf-8'});
@@ -46,69 +66,63 @@ class ButtonExtension {
     console.log('Notebook saved');
   }
 
-  async addStory(panel, context) {
-    // console.log(this.app.commands);
+  async addStoryDetails(panel, context) {
+    // Get the active cell
+    const notebookWidget = this.app.shell.currentWidget;
+    const activeCell = notebookWidget.content.activeCell;
+    
+    // Get the cell content
+    const cellContent = activeCell.model.sharedModel.getSource();
+    const cellArray = cellContent.split('\n');
+    // console.log(cellArray); // Debug log: inspect cell content
+    // console.log(story_comments); // Debug log: inspect story comments
 
+    // Check if the cell is a story cell
+    if (checkCellIsStory(cellArray)) {
+      console.log('Story cell');
+      const newCellContent = cellArray.concat(story_details).join('\n');
+      activeCell.model.sharedModel.setSource(newCellContent);
+    } else {
+      console.log('Not a valid story cell');
+    }
+  }
+
+  async approveStory(panel, context) {
+    // Get the active cell
+    const notebookWidget = this.app.shell.currentWidget;
+    const activeCell = notebookWidget.content.activeCell;
+    
+    // Get the cell content
+    const cellContent = activeCell.model.sharedModel.getSource();
+    const cellArray = cellContent.split('\n');
+
+    // Check cell for approval
+    if (checkPreApproval(cellArray)) {
+      const newCellContent = cellArray.concat(['# Approved']).join('\n');
+      activeCell.model.sharedModel.setSource(newCellContent);
+      console.log('Approved');
+    } else {
+      console.log('Not approved');
+    }
+  }
+
+  async addStory(panel, context) {
+    console.log(this.username);
     // Inserting new cell below
     this.app.commands.execute('notebook:insert-cell-below');
-
-    // const notebook = new Notebook();
-    // // const content_factory = notebook.contentFactory;
-    // const active_cell = notebook.activeCell;
-    // console.log(active_cell);
 
     // Get the active cell
     const notebookWidget = this.app.shell.currentWidget;
     const activeCell = notebookWidget.content.activeCell;
-    // activeCell.loadEditableState();
     console.log(activeCell);
     console.log(activeCell.editor);
     
-    // Story comments
-    const story_comments = [
-      '# id: ',
-      '# description: ',
-      '# accpentance_criteria: '
-    ];
     const story_text = story_comments.join('\n');
     activeCell.model.sharedModel.setSource(story_text);
 
     // Saving the file
     await context.save();
   }
-
-  // async createStory(panel) {
-  //   // const cell = panel.content.model.contentFactory.createCodeCell({
-  //   //   cell: {
-  //   //     source: code[model.defaultKernelName],
-  //   //     metadata: {
-  //   //       trusted: true
-  //   //     }
-  //   //   }
-  //   // });
-    
-
-
-  //   const widget = panel.content;
-  //   const active_cell = widget.activeCell; 
-  //   console.log(active_cell);
-
-  //   if (active_cell && active_cell.model.type === 'code') {
-  //     const story_comments = [
-  //       '# id: ',
-  //       '# description: ',
-  //       '# accpentance_criteria: '
-  //     ];
-
-  //     const code = active_cell.value.text;
-  //     const new_code = story_comments.join('\n') + '\n' + code;
-  //     active_cell.value.text = new_code;
-
-  //     console.log('Story created');
-  //   } else {
-  //     console.log('No active cell');
-  //   }
-  // }
 }
 
 // Plugin to be exported
