@@ -15,23 +15,36 @@ const app = JupyterFrontEnd.instance;
 const saveAs = require('file-saver');
 const { checkCellIsStory, checkPreApproval } = require('./helper');
 const axios = require('axios');
+const { DOMUtils } = require('@jupyterlab/apputils');
+const userRoles = require('./users');
 
 class ButtonExtension {
   constructor(app) {
     this.app = app;
-    this.username = ''; // Retrieve the username from JupyterHub's environment variables
-    this.userRole = ''; // Retrieve the user role from JupyterHub's environment variables
-    this.initializeUserInfo();
+    this.username = this.extractUsernameFromURL(); // Retrieve the username from JupyterHub's environment variables
+    this.userRole = userRoles[this.username]; // Retrieve the user role from JupyterHub's environment variables
+    // this.initializeUserInfo();
   }
 
-  async initializeUserInfo() {
-    try {
-      const response = await axios.get('/hub/api/user', { withCredentials: true });
-      this.username = response.data.name;
-      this.userRole = response.data.admin ? 'admin' : 'user';  // Adjust role logic as needed
-    } catch (error) {
-      console.error('Error fetching user info:', error);
-    }
+  // async initializeUserInfo() {
+  //   try {
+  //     const response = await axios.get('/hub/api/user', { withCredentials: true });
+  //     this.username = response.data.name;
+  //     this.userRole = response.data.admin ? 'admin' : 'user';  // Adjust role logic as needed
+  //   } catch (error) {
+  //     console.error('Error fetching user info:', error);
+  //   }
+  // }
+
+  // Function to extract the username from the URL
+  extractUsernameFromURL() {
+    // const currentUrl = DOMUtils.fullPath(window.location);
+    // console.log(currentUrl);
+
+    const pathParts = window.location.pathname.split('/');
+    console.log(pathParts);
+    const userIndex = pathParts.indexOf('user');
+    return userIndex !== -1 && userIndex + 1 < pathParts.length ? pathParts[userIndex + 1] : '';
   }
 
   createNew(panel, context) {
@@ -53,12 +66,13 @@ class ButtonExtension {
     });
     panel.toolbar.insertItem(12, 'add_details', add_details);
 
-    let approve_story = new ToolbarButton({
-      label: 'Approve',
-      onClick: () => this.approveStory(panel, context)
-    });
-    panel.toolbar.insertItem(13, 'approve_story', approve_story);
-
+    if (this.userRole === 'admin') {
+      let approve_story = new ToolbarButton({
+        label: 'Approve',
+        onClick: () => this.approveStory(panel, context)
+      });
+      panel.toolbar.insertItem(13, 'approve_story', approve_story);
+    }
     return [story_creation, to_csv, add_details, approve_story];
   }
 
