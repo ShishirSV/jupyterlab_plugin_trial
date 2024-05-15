@@ -14,12 +14,24 @@ const { editorServices } = require('@jupyterlab/codemirror');
 const app = JupyterFrontEnd.instance;
 const saveAs = require('file-saver');
 const { checkCellIsStory, checkPreApproval } = require('./helper');
-
+const axios = require('axios');
 
 class ButtonExtension {
   constructor(app) {
     this.app = app;
-    this.username = process.env.JUPYTERHUB_USER; // Retrieve the username from JupyterHub's environment variables
+    this.username = ''; // Retrieve the username from JupyterHub's environment variables
+    this.userRole = ''; // Retrieve the user role from JupyterHub's environment variables
+    this.initializeUserInfo();
+  }
+
+  async initializeUserInfo() {
+    try {
+      const response = await axios.get('/hub/api/user', { withCredentials: true });
+      this.username = response.data.name;
+      this.userRole = response.data.admin ? 'admin' : 'user';  // Adjust role logic as needed
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+    }
   }
 
   createNew(panel, context) {
