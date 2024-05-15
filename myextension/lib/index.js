@@ -73,7 +73,7 @@ class ButtonExtension {
       });
       panel.toolbar.insertItem(13, 'approve_story', approve_story);
     }
-    return [story_creation, to_csv, add_details, approve_story];
+    // return [story_creation, to_csv, add_details, approve_story];
   }
 
   async saveToCSV(context) {
