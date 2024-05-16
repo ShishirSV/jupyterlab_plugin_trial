@@ -14,7 +14,7 @@ const { editorServices } = require('@jupyterlab/codemirror');
 const app = JupyterFrontEnd.instance;
 const saveAs = require('file-saver');
 const { checkCellIsStory, checkPreApproval } = require('./helper');
-const axios = require('axios');
+// const axios = require('axios');
 const { DOMUtils } = require('@jupyterlab/apputils');
 const userRoles = require('./users');
 
@@ -44,29 +44,39 @@ class ButtonExtension {
     const pathParts = window.location.pathname.split('/');
     console.log(pathParts);
     const userIndex = pathParts.indexOf('user');
-    return userIndex !== -1 && userIndex + 1 < pathParts.length ? pathParts[userIndex + 1] : '';
+    return userIndex !== -1 && userIndex + 1 < pathParts.length ? pathParts[userIndex + 1] : 'admin';
   }
 
   createNew(panel, context) {
-    let story_creation = new ToolbarButton({
-        label: 'Create Story',
-        onClick: () => this.addStory(panel, context)
-    });
-    panel.toolbar.insertItem(10, 'story_creation', story_creation);
+    // Create story button
+    if (this.userRole === 'admin' || this.userRole === 'bu') {
+      let story_creation = new ToolbarButton({
+          label: 'Create Story',
+          onClick: () => this.addStory(panel, context)
+      });
+      panel.toolbar.insertItem(10, 'story_creation', story_creation);
+    }
 
-    let to_csv = new ToolbarButton({
-      label: 'Save to CSV',
-      onClick: () => this.saveToCSV(context)
-    });
-    panel.toolbar.insertItem(11, 'to_csv', to_csv);
+    // Save to CSV button
+    if (true) {
+      let to_csv = new ToolbarButton({
+        label: 'Save to CSV',
+        onClick: () => this.saveToCSV(context)
+      });
+      panel.toolbar.insertItem(11, 'to_csv', to_csv);
+    }
 
-    let add_details = new ToolbarButton({
-      label: 'Add Details',
-      onClick: () => this.addStoryDetails(panel, context)
-    });
-    panel.toolbar.insertItem(12, 'add_details', add_details);
+    // Add details button
+    if (this.userRole === 'admin' || this.userRole === 'ds') {
+      let add_details = new ToolbarButton({
+        label: 'Add Details',
+        onClick: () => this.addStoryDetails(panel, context)
+      });
+      panel.toolbar.insertItem(12, 'add_details', add_details);
+    }
 
-    if (this.userRole === 'admin') {
+    // Approve story button
+    if (this.userRole === 'admin' || this.userRole === 'bu') {
       let approve_story = new ToolbarButton({
         label: 'Approve',
         onClick: () => this.approveStory(panel, context)
