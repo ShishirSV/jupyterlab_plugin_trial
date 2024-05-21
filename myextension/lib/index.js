@@ -17,6 +17,9 @@ const { checkCellIsStory, checkPreApproval } = require('./helper');
 // const axios = require('axios');
 const { DOMUtils } = require('@jupyterlab/apputils');
 const userRoles = require('./users');
+const { Widget } = require("@lumino/widgets");
+// const { MongoClient } = require('mongodb');
+const TOP_AREA_CSS_CLASS = 'jp-TopAreaText';
 
 class ButtonExtension {
   constructor(app) {
@@ -48,13 +51,14 @@ class ButtonExtension {
   }
 
   createNew(panel, context) {
+    let position = 10;
     // Create story button
     if (this.userRole === 'admin' || this.userRole === 'bu') {
       let story_creation = new ToolbarButton({
           label: 'Create Story',
           onClick: () => this.addStory(panel, context)
       });
-      panel.toolbar.insertItem(10, 'story_creation', story_creation);
+      panel.toolbar.insertItem(position++, 'story_creation', story_creation);
     }
 
     // Save to CSV button
@@ -63,7 +67,7 @@ class ButtonExtension {
         label: 'Save to CSV',
         onClick: () => this.saveToCSV(context)
       });
-      panel.toolbar.insertItem(11, 'to_csv', to_csv);
+      panel.toolbar.insertItem(position++, 'to_csv', to_csv);
     }
 
     // Add details button
@@ -72,7 +76,7 @@ class ButtonExtension {
         label: 'Add Details',
         onClick: () => this.addStoryDetails(panel, context)
       });
-      panel.toolbar.insertItem(12, 'add_details', add_details);
+      panel.toolbar.insertItem(position++, 'add_details', add_details);
     }
 
     // Approve story button
@@ -81,7 +85,7 @@ class ButtonExtension {
         label: 'Approve',
         onClick: () => this.approveStory(panel, context)
       });
-      panel.toolbar.insertItem(13, 'approve_story', approve_story);
+      panel.toolbar.insertItem(position++, 'approve_story', approve_story);
     }
     // return [story_creation, to_csv, add_details, approve_story];
   }
@@ -95,11 +99,33 @@ class ButtonExtension {
     // Save the cell content to a CSV file
     const cellContent = activeCell.model.sharedModel.getSource();
     console.log(cellContent);
-    const blob = new Blob([cellContent], {type: 'text/csv;charset=utf-8'});
-    saveAs(blob, 'data.csv');
+    // const blob = new Blob([cellContent], {type: 'text/csv;charset=utf-8'});
+    // saveAs(blob, 'data.csv');
+
+    // Save the cell content to the backend server
+    const url = 'http://localhost:3000/saveCellContent';
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ cellContent })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+    } catch (error) {
+      console.error('Error saving cell content:', error);
+
+    } finally { 
+      console.log('Cell content saved');
+    }
 
     await context.save();
-    console.log('Notebook saved');
   }
 
   async addStoryDetails(panel, context) {
@@ -121,6 +147,7 @@ class ButtonExtension {
     } else {
       console.log('Not a valid story cell');
     }
+
   }
 
   async approveStory(panel, context) {
@@ -168,6 +195,14 @@ const yourPlugin = {
   activate: (app) => {
     const your_button = new ButtonExtension(app);
     app.docRegistry.addWidgetExtension('Notebook', your_button);
+
+    // Adding a widget
+    const node = document.createElement('div');
+    node.textContent = 'Wisentel';
+    const widget = new Widget({node});
+    widget.id = DOMUtils.createDomID();
+    widget.addClass(TOP_AREA_CSS_CLASS);
+    app.shell.add(widget, 'top', {rank: 1000});
   }
 };
 
