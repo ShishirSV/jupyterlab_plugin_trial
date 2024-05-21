@@ -10,5 +10,5 @@ export const story_details = [
     '# something_else:' 
   ];
 
-  export const story_pattern = /'# id:\\s*\S*'.*\\n'# description:\\s*\S*'.*\\n'# acceptance_criteria:\\s*\S*'.*/;
+export const story_pattern = /'# id:\\s*\S*'.*\\n'# description:\\s*\S*'.*\\n'# acceptance_criteria:\\s*\S*'.*/;
   
