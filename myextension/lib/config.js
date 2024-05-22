@@ -6,7 +6,7 @@ export const story_comments = [
 
 export const story_details = [
     '# workflow:',
-    '# exception_worklow:',
+    '# exception_workflow:',
     '# something_else:' 
   ];
 

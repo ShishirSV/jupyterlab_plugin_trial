@@ -13,7 +13,7 @@ const {
 const { editorServices } = require('@jupyterlab/codemirror');
 const app = JupyterFrontEnd.instance;
 const saveAs = require('file-saver');
-const { checkCellIsStory, checkPreApproval } = require('./helper');
+const { checkCellIsStory, checkPreApproval, getCellContentData } = require('./helper');
 // const axios = require('axios');
 const { DOMUtils } = require('@jupyterlab/apputils');
 const userRoles = require('./users');
@@ -99,9 +99,18 @@ class ButtonExtension {
     // Save the cell content to a CSV file
     const cellContent = activeCell.model.sharedModel.getSource();
     console.log(cellContent);
+    const cellData = getCellContentData(cellContent);
     // const blob = new Blob([cellContent], {type: 'text/csv;charset=utf-8'});
     // saveAs(blob, 'data.csv');
-
+    console.log(cellData);
+    const id = cellData['id'] ? (cellData['id'].trim() !== '' ? cellData['id'] : null) : null;
+    const description = cellData['description'] ? (cellData['description'].trim() !== '' ? cellData['description'] : null) : null;
+    const acceptance_criteria = cellData['acceptance_criteria'] ? (cellData['acceptance_criteria'].trim() !== '' ? cellData['acceptance_criteria'] : null) : null;
+    const workflow = cellData['workflow'] ? (cellData['workflow'].trim() !== '' ? cellData['workflow'] : null) : null;
+    const exception_workflow = cellData['exception_workflow'] ? (cellData['exception_workflow'].trim() !== '' ? cellData['exception_workflow'] : null) : null;
+    const something_else = cellData['something_else'] ? (cellData['something_else'].trim() !== '' ? cellData['something_else'] : null) : null;
+    const status = cellData['status'] ? (cellData['status'].trim() !== '' ? cellData['status'] : null) : null;
+    
     // Save the cell content to the backend server
     const url = 'http://localhost:3000/saveCellContent';
 
@@ -111,7 +120,7 @@ class ButtonExtension {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ cellContent })
+        body: JSON.stringify({ id, description, acceptance_criteria, workflow, exception_workflow, something_else, status })
       });
 
       if (!response.ok) {
