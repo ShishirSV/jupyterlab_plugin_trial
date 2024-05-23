@@ -13,12 +13,10 @@ const {
 const { editorServices } = require('@jupyterlab/codemirror');
 const app = JupyterFrontEnd.instance;
 const saveAs = require('file-saver');
-const { checkCellIsStory, checkPreApproval } = require('./helper');
-// const axios = require('axios');
+const { checkCellIsStory, checkPreApproval, getCellContentData } = require('./helper');
 const { DOMUtils } = require('@jupyterlab/apputils');
 const userRoles = require('./users');
 const { Widget } = require("@lumino/widgets");
-// const { MongoClient } = require('mongodb');
 const TOP_AREA_CSS_CLASS = 'jp-TopAreaText';
 
 class ButtonExtension {
@@ -26,24 +24,11 @@ class ButtonExtension {
     this.app = app;
     this.username = this.extractUsernameFromURL(); // Retrieve the username from JupyterHub's environment variables
     this.userRole = userRoles[this.username]; // Retrieve the user role from JupyterHub's environment variables
-    // this.initializeUserInfo();
   }
 
-  // async initializeUserInfo() {
-  //   try {
-  //     const response = await axios.get('/hub/api/user', { withCredentials: true });
-  //     this.username = response.data.name;
-  //     this.userRole = response.data.admin ? 'admin' : 'user';  // Adjust role logic as needed
-  //   } catch (error) {
-  //     console.error('Error fetching user info:', error);
-  //   }
-  // }
 
   // Function to extract the username from the URL
   extractUsernameFromURL() {
-    // const currentUrl = DOMUtils.fullPath(window.location);
-    // console.log(currentUrl);
-
     const pathParts = window.location.pathname.split('/');
     console.log(pathParts);
     const userIndex = pathParts.indexOf('user');
@@ -99,9 +84,18 @@ class ButtonExtension {
     // Save the cell content to a CSV file
     const cellContent = activeCell.model.sharedModel.getSource();
     console.log(cellContent);
+    const cellData = getCellContentData(cellContent);
     // const blob = new Blob([cellContent], {type: 'text/csv;charset=utf-8'});
     // saveAs(blob, 'data.csv');
-
+    console.log(cellData);
+    const id = cellData['id'] ? (cellData['id'].trim() !== '' ? cellData['id'] : null) : null;
+    const description = cellData['description'] ? (cellData['description'].trim() !== '' ? cellData['description'] : null) : null;
+    const acceptance_criteria = cellData['acceptance_criteria'] ? (cellData['acceptance_criteria'].trim() !== '' ? cellData['acceptance_criteria'] : null) : null;
+    const workflow = cellData['workflow'] ? (cellData['workflow'].trim() !== '' ? cellData['workflow'] : null) : null;
+    const exception_workflow = cellData['exception_workflow'] ? (cellData['exception_workflow'].trim() !== '' ? cellData['exception_workflow'] : null) : null;
+    const something_else = cellData['something_else'] ? (cellData['something_else'].trim() !== '' ? cellData['something_else'] : null) : null;
+    const status = cellData['status'] ? (cellData['status'].trim() !== '' ? cellData['status'] : null) : null;
+    
     // Save the cell content to the backend server
     const url = 'http://localhost:3000/saveCellContent';
 
@@ -111,7 +105,7 @@ class ButtonExtension {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ cellContent })
+        body: JSON.stringify({ id, description, acceptance_criteria, workflow, exception_workflow, something_else, status })
       });
 
       if (!response.ok) {
