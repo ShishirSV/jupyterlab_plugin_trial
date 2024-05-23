@@ -9,22 +9,7 @@ const port = 3000;
 const uri = process.env.MONGODB_URI; 
 const dbName = 'jupyter-stories'; 
 const collectionName = 'stories'; 
-
-const schema = {
-    bsonType: "object",
-    title: "stories",
-    required: ["id"],
-    properties: {
-      id: { bsonType: "string", minLength: 1 },
-      description: { bsonType: ["string", "null"] },
-      acceptance_criteria: { bsonType: ["string", "null"] },
-      workflow: { bsonType: ["string", "null"] },
-      exception_workflow: { bsonType: ["string", "null"] },
-      something_else: { bsonType: ["string", "null"] },
-      status: { bsonType: ["string", "null"]}
-    }
-
-};
+const { story_schema } = require('./schema');
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -42,7 +27,7 @@ app.post('/saveCellContent', async (req, res) => {
     // Setting schema
     database.command({
       collMod: collectionName,
-      validator: { $jsonSchema: schema },
+      validator: { $jsonSchema: story_schema },
       validationLevel: "strict",
       validationAction: "error"
     });

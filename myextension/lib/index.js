@@ -14,11 +14,9 @@ const { editorServices } = require('@jupyterlab/codemirror');
 const app = JupyterFrontEnd.instance;
 const saveAs = require('file-saver');
 const { checkCellIsStory, checkPreApproval, getCellContentData } = require('./helper');
-// const axios = require('axios');
 const { DOMUtils } = require('@jupyterlab/apputils');
 const userRoles = require('./users');
 const { Widget } = require("@lumino/widgets");
-// const { MongoClient } = require('mongodb');
 const TOP_AREA_CSS_CLASS = 'jp-TopAreaText';
 
 class ButtonExtension {
@@ -26,24 +24,11 @@ class ButtonExtension {
     this.app = app;
     this.username = this.extractUsernameFromURL(); // Retrieve the username from JupyterHub's environment variables
     this.userRole = userRoles[this.username]; // Retrieve the user role from JupyterHub's environment variables
-    // this.initializeUserInfo();
   }
 
-  // async initializeUserInfo() {
-  //   try {
-  //     const response = await axios.get('/hub/api/user', { withCredentials: true });
-  //     this.username = response.data.name;
-  //     this.userRole = response.data.admin ? 'admin' : 'user';  // Adjust role logic as needed
-  //   } catch (error) {
-  //     console.error('Error fetching user info:', error);
-  //   }
-  // }
 
   // Function to extract the username from the URL
   extractUsernameFromURL() {
-    // const currentUrl = DOMUtils.fullPath(window.location);
-    // console.log(currentUrl);
-
     const pathParts = window.location.pathname.split('/');
     console.log(pathParts);
     const userIndex = pathParts.indexOf('user');
