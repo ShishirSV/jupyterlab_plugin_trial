@@ -11,4 +11,5 @@ export const story_details = [
   ];
 
 export const story_pattern = /'# id:\\s*\S*'.*\\n'# description:\\s*\S*'.*\\n'# acceptance_criteria:\\s*\S*'.*/;
-  
+
+export const API_TOKEN = '9540e3935e344320948a393950d70e90';
