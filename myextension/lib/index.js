@@ -72,7 +72,38 @@ class ButtonExtension {
       });
       panel.toolbar.insertItem(position++, 'approve_story', approve_story);
     }
+
+    // Metrices button
+    if (true) {
+      let get_metrics = new ToolbarButton({
+        label: 'Get Metrics',
+        onClick: () => this.getMetrics()
+      });
+      panel.toolbar.insertItem(position++, 'get_metrics', get_metrics);
+    }
     // return [story_creation, to_csv, add_details, approve_story];
+  }
+
+  async getMetrics() {
+    try {
+      const response = await fetch('http://localhost:3000/getCounts');
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      const { totalRecordsCount, approvedRecordsCount, nonNullDescriptionCount } = data;
+  
+      alert(`
+        Total Records: ${totalRecordsCount}
+        Approved Records: ${approvedRecordsCount}
+        Records with Description: ${nonNullDescriptionCount}
+      `);
+  
+    } catch (error) {
+      console.error('Error fetching metrics:', error);
+      alert('Error fetching metrics. Please try again later.');
+    }
   }
 
   async saveToCSV(context) {
@@ -80,6 +111,34 @@ class ButtonExtension {
     const notebookWidget = this.app.shell.currentWidget;
     const activeCell = notebookWidget.content.activeCell;
     console.log(activeCell);
+
+
+    // Check for write access
+    const notebookPath = notebookWidget.context.path;
+
+    try {
+        const response = await fetch(`/api/contents/${notebookPath}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        console.log('Write access checked');
+        const notebookContent = await response.json();
+        console.log(notebookContent);
+        if (!notebookContent.writable) {
+            console.log('User does not have write access to the notebook. Operation aborted.');
+            return;
+        }
+    } catch (error) {
+        console.error('Error checking write access:', error);
+        return;
+    }
+
 
     // Save the cell content to a CSV file
     const cellContent = activeCell.model.sharedModel.getSource();

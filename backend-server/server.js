@@ -13,6 +13,8 @@ const { story_schema } = require('./schema');
 
 app.use(bodyParser.json());
 app.use(cors());
+// Handle preflight OPTIONS requests
+app.options('*', cors());
 
 app.post('/saveCellContent', async (req, res) => {
   const data = req.body;
@@ -38,6 +40,33 @@ app.post('/saveCellContent', async (req, res) => {
 
   } catch (err) {
     console.error('Error connecting to MongoDB or inserting document:', err);
+    res.status(500).send('Internal Server Error');
+
+  } finally {
+    await client.close();
+  }
+});
+
+app.get('/getCounts', async (req, res) => {
+  const client = new MongoClient(uri);
+
+  try {
+    await client.connect();
+    const database = client.db(dbName);
+    const collection = database.collection(collectionName);
+
+    const totalRecordsCount = await collection.countDocuments();
+    const approvedRecordsCount = await collection.countDocuments({ status: 'approved' });
+    const nonNullDescriptionCount = await collection.countDocuments({ description: { $ne: null } });
+
+    res.status(200).json({
+      totalRecordsCount,
+      approvedRecordsCount,
+      nonNullDescriptionCount
+    });
+
+  } catch (err) {
+    console.error('Error connecting to MongoDB or retrieving counts:', err);
     res.status(500).send('Internal Server Error');
 
   } finally {

@@ -1,0 +1,97 @@
+Steps
+
+For this tutorial you need Docker installed in Windows 10. Please follow this tutorial.
+
+#open a Windows cmd and type
+
+powershell
+
+#run a jupyterhub container
+
+docker run -it -p 8000:8000 --name jhubcontainer jupyterhub/jupyterhub bash
+
+# update the repositories
+
+apt update 
+
+# install python3 and related packages
+
+apt-get install npm nodejs python3 python3-pip git nano
+
+# install jupyterhub and jupyterlab
+
+python3 -m pip install jupyterhub notebook jupyterlab
+
+# install nodejs packages
+
+npm install -g configurable-http-proxy
+
+# install native authenticator package
+
+cd /home
+
+git clone https://github.com/jupyterhub/nativeauthenticator.git
+
+cd nativeauthenticator
+
+pip3 install -e .
+
+#modify jupyterconfig
+
+mkdir /etc/jupyterhub   
+
+cd /etc/jupyterhub   
+
+jupyterhub --generate-config -f jupyterhub_config.py
+
+#edit the jupyterhun config file
+
+nano jupyterhub_config.py
+
+import pwd, subprocess
+
+c.JupyterHub.authenticator_class = 'nativeauthenticator.NativeAuthenticator'
+
+c.Authenticator.admin_users = {'admin'}
+
+def pre_spawn_hook(spawner):
+
+    username = spawner.user.name
+
+    try:
+
+        pwd.getpwnam(username)
+
+    except KeyError:
+
+        subprocess.check_call(['useradd', '-ms', '/bin/bash', username])
+
+c.Spawner.pre_spawn_hook = pre_spawn_hook
+
+c.Spawner.default_url = '/lab'
+
+# run jupyterhub
+
+jupyterhub -f /etc/jupyterhub/jupyterhub_config.py
+
+# configure admin and users
+
+http://localhost:8000/hub/signup
+
+Sign up your admin as “admin” and password.
+
+Login as admin and go the authorize window:
+
+http://localhost:8000/hub/authorize
+
+#get the local ip from the computer by typing this in a new cmd:
+
+ipconfig
+
+# for new users
+
+Go to the server local ip address and jupyterhub port
+
+192.168.XXX.XXX:8000/signup
+
+New users that sign up will be displayed to be authorized.
