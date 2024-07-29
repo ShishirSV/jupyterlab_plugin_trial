@@ -19,6 +19,7 @@ const userRoles = require('./users');
 const { Widget } = require("@lumino/widgets");
 const TOP_AREA_CSS_CLASS = 'jp-TopAreaText';
 const { API_TOKEN } = require('./config');
+const { addIcon, saveIcon, checkIcon, spreadsheetIcon } = require('@jupyterlab/ui-components');
 
 class ButtonExtension {
   constructor(app) {
@@ -42,6 +43,7 @@ class ButtonExtension {
     if (this.userRole === 'admin' || this.userRole === 'bu') {
       let story_creation = new ToolbarButton({
           label: 'Create Story',
+          icon: addIcon,
           onClick: () => this.addStory(panel, context)
       });
       panel.toolbar.insertItem(position++, 'story_creation', story_creation);
@@ -51,6 +53,7 @@ class ButtonExtension {
     if (true) {
       let to_csv = new ToolbarButton({
         label: 'Save to CSV',
+        icon: saveIcon,
         onClick: () => this.saveToCSV(context)
       });
       panel.toolbar.insertItem(position++, 'to_csv', to_csv);
@@ -60,6 +63,7 @@ class ButtonExtension {
     if (this.userRole === 'admin' || this.userRole === 'ds') {
       let add_details = new ToolbarButton({
         label: 'Add Details',
+        icon: addIcon,
         onClick: () => this.addStoryDetails(panel, context)
       });
       panel.toolbar.insertItem(position++, 'add_details', add_details);
@@ -69,6 +73,7 @@ class ButtonExtension {
     if (this.userRole === 'admin' || this.userRole === 'bu') {
       let approve_story = new ToolbarButton({
         label: 'Approve',
+        icon: checkIcon,
         onClick: () => this.approveStory(panel, context)
       });
       panel.toolbar.insertItem(position++, 'approve_story', approve_story);
@@ -78,6 +83,7 @@ class ButtonExtension {
     if (true) {
       let get_metrics = new ToolbarButton({
         label: 'Get Metrics',
+        icon: spreadsheetIcon,
         onClick: () => this.getMetrics()
       });
       panel.toolbar.insertItem(position++, 'get_metrics', get_metrics);
@@ -267,6 +273,12 @@ const yourPlugin = {
     // Adding a widget
     const node = document.createElement('div');
     node.textContent = 'Wisentel';
+    // Apply flexbox styles to center the text
+    node.style.display = 'flex';
+    node.style.justifyContent = 'center';
+    node.style.alignItems = 'center';
+    node.style.width = '10%'; // Ensure it takes the full width of the parent
+    node.style.height = '100%';
     const widget = new Widget({node});
     widget.id = DOMUtils.createDomID();
     widget.addClass(TOP_AREA_CSS_CLASS);
